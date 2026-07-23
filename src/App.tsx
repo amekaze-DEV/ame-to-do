@@ -3,6 +3,7 @@ import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import { getBaseFontSize, useOrientation } from "./utils/display";
 import { NavigationLayout, NavItem, LayoutMode } from "./components/NavigationLayout";
+import { Database } from "../packages/data/src";
 
 const navItems: NavItem[] = [
   { id: "home", label: "首页" },
@@ -20,6 +21,9 @@ function App() {
     parseInt(getComputedStyle(document.documentElement).fontSize, 10),
   );
   const [isTooSmall, setIsTooSmall] = useState(false);
+  const [dbStatus, setDbStatus] = useState<"idle" | "connecting" | "ok" | "error">("idle");
+  const [dbVersion, setDbVersion] = useState<number | null>(null);
+  const [dbMessage, setDbMessage] = useState("");
 
   const { orientation, width, height } = useOrientation();
   const dpr = window.devicePixelRatio;
@@ -36,6 +40,36 @@ function App() {
 
   async function greet() {
     setGreetMsg(await invoke("greet", { name }));
+  }
+
+  async function testDatabase() {
+    setDbStatus("connecting");
+    setDbMessage("");
+    setDbVersion(null);
+
+    try {
+      const db = new Database();
+      await db.connect();
+
+      await db.execute("CREATE TABLE IF NOT EXISTS task04_test (id INTEGER PRIMARY KEY, name TEXT)");
+      await db.execute("INSERT OR REPLACE INTO task04_test (id, name) VALUES (1, ?)", ["AME to do"]);
+
+      const row = await db.selectOne<{ name: string }>(
+        "SELECT name FROM task04_test WHERE id = 1",
+      );
+      const version = await db.getUserVersion();
+      await db.setUserVersion(version + 1);
+      const newVersion = await db.getUserVersion();
+
+      await db.close();
+
+      setDbVersion(newVersion);
+      setDbMessage(`连接成功，测试数据: ${row?.name ?? "null"}`);
+      setDbStatus("ok");
+    } catch (err) {
+      setDbStatus("error");
+      setDbMessage(err instanceof Error ? err.message : String(err));
+    }
   }
 
   const aspectRatio = (width / height).toFixed(2);
@@ -206,6 +240,42 @@ function App() {
             </div>
           </div>
 
+          <div className="mt-md p-md rounded-lg bg-surface-elevated border border-surface-border">
+            <h2 className="text-xl font-semibold mb-sm">Task-04 验证面板</h2>
+            <div className="flex flex-wrap items-center gap-sm mb-sm">
+              <button
+                onClick={testDatabase}
+                disabled={dbStatus === "connecting"}
+                className="px-md py-sm rounded-md bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700 disabled:bg-primary-300 transition-colors font-medium"
+                style={{ minHeight: "var(--touch-target-min)" }}
+              >
+                {dbStatus === "connecting" ? "测试中..." : "测试 SQLite 连接"}
+              </button>
+              {dbStatus !== "idle" && dbStatus !== "connecting" && (
+                <span
+                  className={`text-sm font-medium ${
+                    dbStatus === "ok" ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  {dbStatus === "ok" ? "✓ 数据库连接正常" : "✗ 数据库连接失败"}
+                </span>
+              )}
+            </div>
+            {dbMessage && (
+              <p className="text-sm text-text-secondary mb-xs">
+                {dbMessage}
+                {dbVersion !== null && (
+                  <span className="ml-sm text-primary-600 font-mono">
+                    user_version: {dbVersion}
+                  </span>
+                )}
+              </p>
+            )}
+            <p className="text-xs text-text-secondary">
+              点击按钮验证 SQLite 连接、建表、读写、user_version 管理。此功能需要在 Tauri 桌面环境中运行。
+            </p>
+          </div>
+
           <div className="mt-sm pt-sm border-t border-surface-border text-xs text-text-secondary">
             <p className="mb-xs">
               <strong className="text-text-primary">Task-02 验证项:</strong> Tailwind
@@ -215,6 +285,10 @@ function App() {
             <p className="mb-xs">
               <strong className="text-text-primary">Task-02.5 验证项:</strong>{" "}
               横竖屏判断(高大于宽显示portrait)、导航位置(竖屏在底部/横屏在左侧)、安全区域变量、触控目标、最小窗口(缩到360*480以下会提示)。
+            </p>
+            <p className="mb-xs">
+              <strong className="text-text-primary">Task-04 验证项:</strong>{" "}
+              点击"测试 SQLite 连接"，验证数据库可连接、可执行 SQL、user_version 可读写。
             </p>
             <p>
               <strong className="text-text-primary">Greet 功能:</strong>{" "}
