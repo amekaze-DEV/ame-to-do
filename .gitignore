@@ -7,6 +7,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# TRAE temporary files
+.trae-html-share-packages/
+
 node_modules
 dist
 dist-ssr
