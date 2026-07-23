@@ -104,6 +104,7 @@
 - **阻塞**：Task-02
 
 ### Task-03：搭建项目目录结构
+- **状态**：已完成
 - **目标**：按 design.md 迁移友好目录规范创建 Monorepo 结构
 - **输入**：design.md 项目目录结构章节
 - **输出**：完整 Monorepo 目录树，每个目录包含 `.gitkeep`、空 `index.ts` 或 `README.md`

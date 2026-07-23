@@ -1,25 +1,24 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
-
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "baseUrl": ".",
+    "paths": {
+      "@ame-todo/core/*": ["packages/core/src/*"],
+      "@ame-todo/domain/*": ["packages/domain/src/*"],
+      "@ame-todo/services/*": ["packages/services/src/*"],
+      "@ame-todo/data/*": ["packages/data/src/*"],
+      "@ame-todo/platform-contracts": ["packages/platform-contracts/src/index.ts"],
+      "@ame-todo/platform-contracts/*": ["packages/platform-contracts/src/*"],
+      "@ame-todo/ui": ["packages/ui/src/index.ts"],
+      "@ame-todo/ui/*": ["packages/ui/src/*"],
+      "@ame-todo/widget-kit": ["packages/widget-kit/src/index.ts"],
+      "@ame-todo/widget-kit/*": ["packages/widget-kit/src/*"],
+      "@ame-todo/sync-webdav": ["packages/sync-webdav/src/index.ts"],
+      "@ame-todo/sync-webdav/*": ["packages/sync-webdav/src/*"],
+      "@ame-todo/shared": ["packages/shared/src/index.ts"],
+      "@ame-todo/shared/*": ["packages/shared/src/*"]
+    }
   },
-  "include": ["src"],
+  "include": ["src", "packages/*/src", "packages/platform-implementations/*/src", "apps/*/src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
