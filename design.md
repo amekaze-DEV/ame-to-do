@@ -964,8 +964,16 @@ const breakpoints = {
 
 ### 横竖屏适配
 
+**重要说明：本项目不使用设备方向传感器（DeviceOrientationEvent）判断横竖屏，
+而是基于视口宽高比（viewport aspect ratio）判断。原因：**
+1. 桌面端设备没有方向传感器，但同样需要响应窗口长宽比变化
+2. 移动端浏览器的 `window.orientation` API 已被废弃，各浏览器支持不一致
+3. 宽高比判断在所有平台表现一致，便于 UI 组件跨平台复用
+4. 桌面端用户拖动窗口边缘改变长宽比时，布局也能正确切换
+
 ```typescript
-// 监听窗口尺寸变化，判断当前方向
+// 基于视口宽高比判断方向，不依赖任何硬件传感器
+// AI Agent 注意：不要改用 DeviceOrientationEvent 或 window.orientation
 type Orientation = 'portrait' | 'landscape';
 
 function getOrientation(width: number, height: number): Orientation {
@@ -973,8 +981,8 @@ function getOrientation(width: number, height: number): Orientation {
 }
 
 // 布局策略：
-// - portrait：导航栏在底部，内容垂直堆叠
-// - landscape：导航栏在左侧，内容左右分栏
+// - portrait（高 > 宽）：导航栏在底部，内容垂直堆叠
+// - landscape（宽 ≥ 高）：导航栏在左侧，内容左右分栏
 ```
 
 ## 单文件封装方案

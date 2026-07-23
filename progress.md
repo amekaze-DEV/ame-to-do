@@ -7,10 +7,10 @@
 | 项目 | 当前状态 |
 |---|---|
 | 当前阶段 | Phase 1：项目初始化与基础设施 |
-| 当前任务 | Task-03：搭建项目目录结构 |
-| 最近一次更新 | 2026-07-23 - Task-02 待验收 |
+| 当前任务 | Task-03：搭建项目目录结构（待开始） |
+| 最近一次更新 | 2026-07-23 - 完成架构优化文档与脚本占位 |
 | 当前阻塞 | 暂无 |
-| 下一步 | 人工验收 Task-02 |
+| 下一步 | 人工验收 Task-01/02，验收通过后进入 Task-03 |
 
 ## 状态说明
 
@@ -87,6 +87,7 @@
 ### 今日目标
 - Task-01：初始化 Tauri + React + TypeScript 项目
 - Task-02：配置 Tailwind CSS 与全局样式
+- 架构优化：落实平台代码隔离与 UI 可移植性的优化建议
 
 ### 今日完成
 - Task-01：使用 `pnpm create tauri-app@latest` 创建 React + TypeScript 项目
@@ -106,6 +107,20 @@
 - Task-02：TypeScript 严格模式类型检查通过（`npx tsc --noEmit` exit code 0）
 - Task-02：Vite 生产构建成功（CSS 8.80 kB, JS 196.47 kB）
 - Task-02：浏览器运行验证：root font-size=16px, h1颜色=rgb(37,99,235)(primary-600), CSS变量正常
+- 架构优化：创建 `docs/` 目录，写入 5 份文档骨架：
+  - [docs/PLATFORM_MATRIX.md](file:///f:/Project_AME_todo/docs/PLATFORM_MATRIX.md)：平台能力支持矩阵（7 大平台 × 30+ 能力项的状态标记 + 新增平台 Checklist）
+  - [docs/PORTING_GUIDE.md](file:///f:/Project_AME_todo/docs/PORTING_GUIDE.md)：跨平台移植指南（业务核心零修改原则 + 7 步移植流程 + 各平台特有注意事项）
+  - [docs/APP_PORTING_GUIDE.md](file:///f:/Project_AME_todo/docs/APP_PORTING_GUIDE.md)：UI 组件与模块移植到其他项目指南（8 类可复用资产的移植方式 + 可移植性维护规则）
+  - [docs/ARCHITECTURE.md](file:///f:/Project_AME_todo/docs/ARCHITECTURE.md)：架构说明（四层架构、依赖方向、模块系统、事件总线、ADR 决策记录）
+  - [docs/MODULE_GUIDE.md](file:///f:/Project_AME_todo/docs/MODULE_GUIDE.md)：模块开发指南（模块目录结构 + 完整代码示例 + 开发 Checklist）
+- 架构优化：创建 `scripts/` 目录，写入 2 份自动化脚本占位：
+  - [scripts/check-boundaries.js](file:///f:/Project_AME_todo/scripts/check-boundaries.js)：架构边界检查脚本（待 Monorepo 结构搭建后实现）
+  - [scripts/check-platform-matrix.js](file:///f:/Project_AME_todo/scripts/check-platform-matrix.js)：平台能力矩阵一致性检查脚本（待平台适配层实现后启用）
+- 架构优化：在 [todo.md](file:///f:/Project_AME_todo/todo.md) 中补充 3 个优化任务：
+  - Task-11.5（Phase 2）：实现架构边界检查脚本与 ESLint 规则
+  - Task-11.6（Phase 2）：平台能力矩阵与实现一致性检查
+  - Task-27.5（Phase 5）：完善 packages/ui 组件库可移植性
+- 架构优化：在 [risk.md](file:///f:/Project_AME_todo/risk.md) 中补充 4 个架构相关风险项（R-008 ~ R-011）
 
 ### 待验收
 - Task-01：在非沙盒环境中运行 `npx tauri dev`，确认窗口能否正常弹出
@@ -116,15 +131,19 @@
 - Task-02：验证 DPI 适配（在高 DPI 显示器上检查 root font-size 是否自动调整）
 
 ### 阻塞问题
-- TRAE 沙盒限制：不允许访问 `C:\Users\amekaze\AppData\Local\com.ame.todo` 目录，导致 Tauri 窗口在 TRAE 环境中运行时报 "拒绝访问 (os error 5)"。在真实系统中运行应无此问题。
+- ~~TRAE 沙盒限制：不允许访问 `AppData\Local\com.ame.todo` 目录~~ → **已解决**（切换为直接运行模式），Tauri 窗口可正常弹出
 
 ### 文档同步
 - requirements.md：未变更
 - design.md：未变更
-- todo.md：未变更
+- todo.md：已更新（补充 Task-11.5、Task-11.6、Task-27.5 三个优化任务）
 - GUIDE.md：未变更
+- risk.md：已更新（新增 R-008 ~ R-011 四个架构风险项）
 - progress.md：已更新
+- 新增 docs/：5 份文档（PLATFORM_MATRIX、PORTING_GUIDE、APP_PORTING_GUIDE、ARCHITECTURE、MODULE_GUIDE）
+- 新增 scripts/：2 份自动化脚本占位（check-boundaries、check-platform-matrix）
 
 ### 明日继续
-- 验收 Task-02 后进入 Task-03
+- 人工验收 Task-01 / Task-02
+- 验收通过后进入 Task-03（搭建项目目录结构）
 

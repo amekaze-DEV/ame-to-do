@@ -59,6 +59,7 @@
 ## Phase 1：项目初始化与基础设施（0 依赖）
 
 ### Task-01：初始化 Tauri + React + TypeScript 项目
+- **状态**：已完成
 - **目标**：创建可运行的基础项目骨架
 - **输入**：design.md 技术选型章节
 - **输出**：`npm run tauri dev` 可正常启动空白窗口
@@ -71,6 +72,7 @@
 - **阻塞**：无
 
 ### Task-02：配置 Tailwind CSS 与全局样式
+- **状态**：已完成
 - **目标**：搭建样式系统，配置 DPI 响应式基础
 - **输入**：design.md 显示适配设计章节
 - **输出**：Tailwind 正常工作，root font-size 支持动态调整
@@ -82,6 +84,24 @@
   5. 在应用入口动态设置 `document.documentElement.style.fontSize`
 - **耗时**：1h
 - **阻塞**：Task-01
+
+### Task-02.5：实现横竖屏切换与移动设备适配基础
+- **状态**：已完成
+- **目标**：基于视口宽高比（而非设备传感器）实现横竖屏状态检测、响应式布局基础和移动端安全区域适配
+- **输入**：design.md 横竖屏适配章节 + requirements.md F-DISP-002 ~ F-DISP-006
+- **输出**：可检测横竖屏状态（宽高比判断），布局可根据方向切换，安全区域 CSS 变量可用
+- **步骤**：
+  1. 实现 `useOrientation()` hook，**基于 `window.innerWidth / window.innerHeight` 宽高比**判断 portrait / landscape，监听 `resize` 事件更新
+  2. 在 Tailwind 配置中添加 `portrait:` / `landscape:` 变体（同样基于宽高比，不依赖传感器）
+  3. 定义安全区域 CSS 变量（`--safe-area-inset-top/right/bottom/left`）
+  4. 实现基础布局组件 `NavigationLayout`，支持：
+     - portrait（高 > 宽）：导航栏在底部，内容垂直堆叠
+     - landscape（宽 ≥ 高）：导航栏在左侧，内容左右分栏
+  5. 定义最小窗口尺寸（360×480），低于该尺寸时显示滚动提示
+  6. 添加触控区域适配变量（最小触控目标 44×44 逻辑像素）
+- **注意**：禁止使用 `DeviceOrientationEvent`、`window.orientation` 等传感器 API
+- **耗时**：1.5h
+- **阻塞**：Task-02
 
 ### Task-03：搭建项目目录结构
 - **目标**：按 design.md 迁移友好目录规范创建 Monorepo 结构
@@ -97,8 +117,9 @@
   7. 创建 `packages/platform-contracts/`，放置所有平台能力接口
   8. 创建 `packages/platform-implementations/`，包含 windows-tauri、macos-tauri、linux-tauri、mobile-capacitor、mock
   9. 创建 `packages/ui/`、`packages/features/`、`packages/widget-kit/`、`packages/sync-webdav/`、`packages/shared/`
-  10. 创建 `docs/PORTING_GUIDE.md`、`docs/PLATFORM_MATRIX.md`
-  11. 创建 `pnpm-workspace.yaml` 和 `tsconfig.base.json`
+  10. 创建 `docs/` 文档体系：`docs/PORTING_GUIDE.md`、`docs/PLATFORM_MATRIX.md`、`docs/ARCHITECTURE.md`、`docs/APP_PORTING_GUIDE.md`、`docs/MODULE_GUIDE.md`
+  11. 创建 `scripts/` 目录，放置 `check-boundaries.js`（占位）、`check-platform-matrix.js`（占位）等自动化脚本
+  12. 创建 `pnpm-workspace.yaml` 和 `tsconfig.base.json`
 - **耗时**：1.5h
 - **阻塞**：Task-01
 
@@ -209,6 +230,31 @@
   5. 将模块状态持久化到 `module_states` 表
 - **耗时**：1.5h
 - **阻塞**：Task-10, Task-09
+
+### Task-11.5：实现架构边界检查脚本与 ESLint 规则
+- **目标**：防止平台代码泄漏到业务层，确保架构分层不被破坏
+- **输入**：design.md 迁移边界规则 + docs/ARCHITECTURE.md
+- **输出**：`node scripts/check-boundaries.js` 可正常运行并输出违规报告
+- **步骤**：
+  1. 实现 `scripts/check-boundaries.js`：扫描 `packages/*` 下所有 import 语句，按目录归属检查依赖合规性
+  2. 输出违规报告：文件、行号、违规类型、修复建议
+  3. 支持 CI 集成（exit code 非零表示有违规）
+  4. 配置 ESLint `import/no-restricted-paths` 规则，编码时实时提示依赖违规
+  5. 将 `pnpm run check:boundaries` 加入 `package.json` scripts
+- **耗时**：1.5h
+- **阻塞**：Task-03（需要 Monorepo 目录结构）
+
+### Task-11.6：平台能力矩阵与实现一致性检查
+- **目标**：确保 docs/PLATFORM_MATRIX.md 中的状态标记与实际代码实现一致
+- **输入**：docs/PLATFORM_MATRIX.md + packages/platform-implementations/*
+- **输出**：`node scripts/check-platform-matrix.js` 可检测不一致并报告
+- **步骤**：
+  1. 实现 `scripts/check-platform-matrix.js`：解析 PLATFORM_MATRIX.md 表格，对比 packages/platform-implementations/* 中的实际实现
+  2. 检测以下不一致：标记为 ✅ 但方法抛出 NotSupportedError、标记为 ❌ 但实际已实现
+  3. 输出不一致报告
+  4. 将 `pnpm run check:platform-matrix` 加入 `package.json` scripts
+- **耗时**：1h
+- **阻塞**：Task-08（需要平台适配器接口定义）
 
 ---
 
@@ -338,7 +384,7 @@
   7. 实现月份切换、年份跳转、返回今日
   8. 适配响应式布局（compact / expanded）
 - **耗时**：2h
-- **阻塞**：Task-19, Task-02
+- **阻塞**：Task-19, Task-02.5
 
 ### Task-21：实现事项管理模块（数据层 + 服务层）
 - **目标**：事项的增删改查和提醒调度
@@ -364,7 +410,7 @@
   4. 实现待办事项和定时事项的区分展示
   5. 同步状态视觉标识（已同步/未同步/冲突）
 - **耗时**：1.5h
-- **阻塞**：Task-21, Task-02
+- **阻塞**：Task-21, Task-02.5
 
 ### Task-23：实现 WebDAV 同步模块
 - **目标**：数据可同步到 WebDAV，支持冲突处理
@@ -440,6 +486,20 @@
 - **耗时**：1h
 - **阻塞**：Task-20, Task-22
 
+### Task-27.5：完善 packages/ui 组件库可移植性
+- **目标**：确保 UI 组件库可独立发布并复用到其他项目
+- **输入**：docs/APP_PORTING_GUIDE.md + design.md 显示适配设计
+- **输出**：`packages/ui` 可独立构建，提供 Storybook 文档
+- **步骤**：
+  1. 配置 `packages/ui/package.json` 支持独立构建与发布（`@ame-todo/ui`）
+  2. 提取 `tailwind.config.js` 主题为独立 preset（`tailwind.preset.js`）
+  3. 确保 `packages/ui` 不依赖任何业务服务（`packages/services`）和平台实现
+  4. 集成 Storybook 到 `packages/ui`，为每个通用组件提供示例
+  5. 验证 `packages/ui` 可在外部项目中通过 `pnpm add @ame-todo/ui` 引入并正常工作
+  6. 更新 `docs/APP_PORTING_GUIDE.md`，补充实际引入步骤和主题定制说明
+- **耗时**：2h
+- **阻塞**：Task-03（需要 Monorepo 结构）, Task-20, Task-22（需要业务 UI 沉淀后抽取）
+
 ---
 
 ## Phase 6：集成测试与发布（依赖 Phase 5）
@@ -509,7 +569,7 @@
 
 ```text
 Phase 1: 基础设施
-  Task-01 → Task-02 → Task-03
+  Task-01 → Task-02 → Task-02.5 → Task-03
   Task-01 → Task-04
 
 Phase 2: 核心框架
@@ -522,8 +582,8 @@ Phase 3: 平台适配
 
 Phase 4: 业务模块
   Task-09 → Task-19, Task-21
-  Task-19 + Task-02 → Task-20
-  Task-21 + Task-02 → Task-22
+  Task-19 + Task-02.5 → Task-20
+  Task-21 + Task-02.5 → Task-22
   Task-18 + Task-21 → Task-23
 
 Phase 5: 高级功能
@@ -543,15 +603,15 @@ Phase 6: 集成发布
 
 | 阶段 | 任务数 | 预估工时 |
 |---|---|---|
-| Phase 1：基础设施 | 4 | 5h |
+| Phase 1：基础设施 | 5 | 6.5h |
 | Phase 2：核心框架 | 7 | 9h |
 | Phase 3：平台适配 | 7 | 10h |
 | Phase 4：业务模块 | 5 | 9h |
 | Phase 5：高级功能 | 4 | 6h |
 | Phase 6：集成发布 | 4 | 6.5h |
-| **合计** | **31** | **约 45.5h** |
+| **合计** | **32** | **约 47h** |
 
-> 按每天 6 小时有效开发时间计算，**约 7-8 个工作日**完成初始版本。
+> 按每天 6 小时有效开发时间计算，**约 8 个工作日**完成初始版本。
 
 ## 执行建议
 

@@ -57,7 +57,18 @@ export default {
         'md': 'var(--radius-md)',
         'lg': 'var(--radius-lg)',
       },
+      minWidth: {
+        'app': '360px',
+      },
+      minHeight: {
+        'app': '480px',
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addVariant }) {
+      addVariant('portrait', '@media (max-aspect-ratio: 1/1)');
+      addVariant('landscape', '@media (min-aspect-ratio: 1/1)');
+    },
+  ],
 }
