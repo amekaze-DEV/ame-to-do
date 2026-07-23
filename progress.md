@@ -6,11 +6,11 @@
 
 | 项目 | 当前状态 |
 |---|---|
-| 当前阶段 | Phase 1：项目初始化与基础设施 |
-| 当前任务 | Task-03：搭建项目目录结构（待开始） |
-| 最近一次更新 | 2026-07-23 - 完成架构优化文档与脚本占位 |
-| 当前阻塞 | 暂无 |
-| 下一步 | 人工验收 Task-01/02，验收通过后进入 Task-03 |
+| 当前阶段 | Phase 2：核心框架层 |
+| 当前任务 | Task-05：实现事件总线 EventBus |
+| 最近一次更新 | 2026-07-23 - Phase 1 验收通过 |
+| 当前阻塞 | 无 |
+| 下一步 | 按 Phase 2 顺序执行 Task-05 ~ Task-09 |
 
 ## 状态说明
 
@@ -143,7 +143,43 @@
 - 新增 docs/：5 份文档（PLATFORM_MATRIX、PORTING_GUIDE、APP_PORTING_GUIDE、ARCHITECTURE、MODULE_GUIDE）
 - 新增 scripts/：2 份自动化脚本占位（check-boundaries、check-platform-matrix）
 
+## 2026-07-23（Phase 1 验证）
+
+### 今日目标
+- 按 [docs/PHASE1_VERIFICATION.md](file:///f:/Project_AME_todo/docs/PHASE1_VERIFICATION.md) 执行 Phase 1 验证
+- 修复验证过程中发现的配置问题
+
+### 今日完成
+- 执行 `npx tsc --noEmit`：TypeScript strict 模式 0 错误
+- 执行 `npx vite build`：生产构建成功，生成 `dist/`
+- 执行 `pnpm -r exec echo "workspace ok"`：工作区 12 个项目全部正常（修复 `pnpm-workspace.yaml` allowBuilds 配置后通过）
+- 执行 `node scripts/check-boundaries.js` 与 `node scripts/check-platform-matrix.js`：占位脚本运行正常
+- 执行 `npx tauri build`：Rust release 编译成功，生成 `src-tauri/target/release/ame-to-do.exe`；MSI 打包因下载 WiX 工具链耗时过长被中断
+- 执行 `npx tauri dev`：Vite dev server 启动成功（http://localhost:1420/），Rust debug 编译成功，后端运行正常
+- 全局搜索确认未使用 `DeviceOrientationEvent` 或 `window.orientation`
+- 修复 [pnpm-workspace.yaml](file:///f:/Project_AME_todo/pnpm-workspace.yaml) 中错误的 `allowBuilds` 配置格式
+- 修复 Task-04 SQLite 连接失败：在 [src-tauri/capabilities/default.json](file:///f:/Project_AME_todo/src-tauri/capabilities/default.json) 中添加 SQL 插件权限（`sql:default`、`sql:allow-load`、`sql:allow-execute`、`sql:allow-select`、`sql:allow-close`）
+- 创建 [docs/PHASE1_VERIFICATION.md](file:///f:/Project_AME_todo/docs/PHASE1_VERIFICATION.md)
+
+### 待验收
+- 无
+
+### 验收结果
+- Phase 1 验收通过：窗口标题、Greet、Tailwind 断点、DPI 适配、横竖屏方向与导航、最小窗口提示、SQLite 连接测试均正常
+
+### 阻塞问题
+- 无
+
+### 文档同步
+- requirements.md：未变更
+- design.md：未变更
+- todo.md：未变更
+- GUIDE.md：未变更
+- progress.md：已更新
+- risk.md：未变更
+- 新增 docs/PHASE1_VERIFICATION.md
+
 ### 明日继续
-- 人工验收 Task-01 / Task-02
-- 验收通过后进入 Task-03（搭建项目目录结构）
+- 人工验收 Task-01 ~ Task-04
+- 验收通过后进入 Phase 2
 

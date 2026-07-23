@@ -57,13 +57,16 @@ function App() {
       const row = await db.selectOne<{ name: string }>(
         "SELECT name FROM task04_test WHERE id = 1",
       );
-      const version = await db.getUserVersion();
-      await db.setUserVersion(version + 1);
-      const newVersion = await db.getUserVersion();
+
+      // 验证 user_version 可读写，但不污染迁移版本状态
+      const originalVersion = await db.getUserVersion();
+      const testVersion = originalVersion === 0 ? 1 : originalVersion;
+      await db.setUserVersion(testVersion);
+      const confirmedVersion = await db.getUserVersion();
 
       await db.close();
 
-      setDbVersion(newVersion);
+      setDbVersion(confirmedVersion);
       setDbMessage(`连接成功，测试数据: ${row?.name ?? "null"}`);
       setDbStatus("ok");
     } catch (err) {

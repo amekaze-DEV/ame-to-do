@@ -3,4 +3,4 @@ packages:
   - "packages/*"
   - "packages/platform-implementations/*"
 allowBuilds:
-  esbuild: set this to true or false
+  esbuild: true
